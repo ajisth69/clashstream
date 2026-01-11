@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const { exec } = require('child_process');
 const util = require('util');
 const https = require('https');
@@ -14,23 +13,16 @@ const PORT = process.env.PORT || 3000;
 // Serve static files from public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Check if cookies.txt exists
-const cookiesPath = path.join(__dirname, 'cookies.txt');
-const cookiesExist = fs.existsSync(cookiesPath);
-
-if (cookiesExist) {
-    console.log('✓ cookies.txt found - authentication enabled');
-} else {
-    console.log('⚠ cookies.txt not found - some videos may be restricted');
-}
+console.log('🎵 ClashStream running in cookie-less mode');
 
 // Cache for stream URLs (they expire quickly)
 const urlCache = new Map();
 
-// Helper function to run yt-dlp
+// Helper function to run yt-dlp (no cookies needed)
 async function runYtDlp(args) {
-    const cookieArg = cookiesExist ? `--cookies "${cookiesPath}"` : '';
-    const cmd = `yt-dlp ${cookieArg} ${args}`;
+    // Add headers to avoid bot detection
+    const headers = '--add-header "User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"';
+    const cmd = `yt-dlp ${headers} --no-check-certificates ${args}`;
     console.log(`Running: yt-dlp ${args.substring(0, 60)}...`);
 
     try {
@@ -303,7 +295,7 @@ app.listen(PORT, () => {
 ║                                                   ║
 ║   🎵 ClashStream Server Running                   ║
 ║   📍 http://localhost:${PORT}                       ║
-║   🍪 Cookies: ${cookiesExist ? 'Enabled' : 'Disabled'}                           ║
+║   🚀 Cookie-less Mode                             ║
 ║                                                   ║
 ╚═══════════════════════════════════════════════════╝
     `);
